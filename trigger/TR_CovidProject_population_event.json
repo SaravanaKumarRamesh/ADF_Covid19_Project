@@ -3,7 +3,14 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Copydata_CovidProject",
+					"type": "PipelineReference"
+				}
+			}
+		],
 		"type": "BlobEventsTrigger",
 		"typeProperties": {
 			"blobPathBeginsWith": "/covid-project-container/blobs/tps00010.tsv.gz",
