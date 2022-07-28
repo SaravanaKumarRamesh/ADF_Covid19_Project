@@ -14,7 +14,7 @@
 				"folderPath": "Population",
 				"fileSystem": "covidproject"
 			},
-			"columnDelimiter": ",",
+			"columnDelimiter": "\t",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
