@@ -1,0 +1,25 @@
+{
+	"name": "DS_Blb_CovidProject",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_CovidProject_BLB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "tps00010.tsv.gz",
+				"container": "covid-project-container"
+			},
+			"columnDelimiter": "\t",
+			"compressionCodec": "gzip",
+			"compressionLevel": "Optimal",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

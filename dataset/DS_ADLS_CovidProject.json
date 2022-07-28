@@ -1,0 +1,24 @@
+{
+	"name": "DS_ADLS_CovidProject",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_adls_covidproject",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Population_by_Age.tsv",
+				"folderPath": "Population",
+				"fileSystem": "covidproject"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
