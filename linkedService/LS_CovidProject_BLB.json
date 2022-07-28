@@ -1,0 +1,17 @@
+{
+	"name": "LS_CovidProject_BLB",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_CovidProject",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "Az-blbstrge-connstrng"
+			}
+		}
+	}
+}
