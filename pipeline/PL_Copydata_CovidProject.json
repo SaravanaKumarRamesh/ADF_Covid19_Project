@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Vlidate if file is present",
+				"name": "Validate if file is present",
 				"type": "Validation",
 				"dependsOn": [],
 				"userProperties": [],
@@ -21,7 +21,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Vlidate if file is present",
+						"activity": "Validate if file is present",
 						"dependencyConditions": [
 							"Succeeded"
 						]
