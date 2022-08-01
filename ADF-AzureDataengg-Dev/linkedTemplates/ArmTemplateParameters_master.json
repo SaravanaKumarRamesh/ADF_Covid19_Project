@@ -5,17 +5,20 @@
 		"factoryName": {
 			"value": "ADF-AzureDataengg-Dev"
 		},
+		"LS_ADLS_Metadata_Json_Covid_properties_typeProperties_url": {
+			"value": "https://azadfdatalakegen2.dfs.core.windows.net"
+		},
 		"LS_CovidProject_BLB_properties_typeProperties_connectionString_secretName": {
 			"value": "Az-blbstrge-connstrng"
+		},
+		"LS_Covid_ECDwebsite_Project_properties_typeProperties_url": {
+			"value": "@{linkedService().sourceBaseURL}"
 		},
 		"LS_KV_CovidProject_properties_typeProperties_baseUrl": {
 			"value": "https://Azure-adf-Keyvalut.vault.azure.net/"
 		},
 		"LS_adls_covidproject_properties_typeProperties_url": {
 			"value": "https://azadfdatalakegen2.dfs.core.windows.net"
-		},
-		"TR_CovidProject_population_event_properties_typeProperties_scope": {
-			"value": "/subscriptions/e28292ad-5166-4e02-8b60-16a2151d18a5/resourceGroups/Storage-RG/providers/Microsoft.Storage/storageAccounts/saravanastroagetest"
 		},
 		"containerUri": {
 			"value": ""

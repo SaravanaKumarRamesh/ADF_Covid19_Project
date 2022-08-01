@@ -7,9 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "ADF-AzureDataengg-Dev"
 		},
+		"LS_ADLS_Metadata_Json_Covid_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://azadfdatalakegen2.dfs.core.windows.net"
+		},
 		"LS_CovidProject_BLB_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "Az-blbstrge-connstrng"
+		},
+		"LS_Covid_ECDwebsite_Project_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().sourceBaseURL}"
 		},
 		"LS_KV_CovidProject_properties_typeProperties_baseUrl": {
 			"type": "string",
@@ -18,10 +26,6 @@
 		"LS_adls_covidproject_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://azadfdatalakegen2.dfs.core.windows.net"
-		},
-		"TR_CovidProject_population_event_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/e28292ad-5166-4e02-8b60-16a2151d18a5/resourceGroups/Storage-RG/providers/Microsoft.Storage/storageAccounts/saravanastroagetest"
 		},
 		"containerUri": {
 			"type": "string",
@@ -50,17 +54,20 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"LS_Covid_ECDwebsite_Project_properties_typeProperties_url": {
+						"value": "[parameters('LS_Covid_ECDwebsite_Project_properties_typeProperties_url')]"
+					},
 					"LS_KV_CovidProject_properties_typeProperties_baseUrl": {
 						"value": "[parameters('LS_KV_CovidProject_properties_typeProperties_baseUrl')]"
+					},
+					"LS_ADLS_Metadata_Json_Covid_properties_typeProperties_url": {
+						"value": "[parameters('LS_ADLS_Metadata_Json_Covid_properties_typeProperties_url')]"
 					},
 					"LS_CovidProject_BLB_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('LS_CovidProject_BLB_properties_typeProperties_connectionString_secretName')]"
 					},
 					"LS_adls_covidproject_properties_typeProperties_url": {
 						"value": "[parameters('LS_adls_covidproject_properties_typeProperties_url')]"
-					},
-					"TR_CovidProject_population_event_properties_typeProperties_scope": {
-						"value": "[parameters('TR_CovidProject_population_event_properties_typeProperties_scope')]"
 					}
 				}
 			},

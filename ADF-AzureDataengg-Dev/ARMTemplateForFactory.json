@@ -7,9 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "ADF-AzureDataengg-Dev"
 		},
+		"LS_ADLS_Metadata_Json_Covid_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://azadfdatalakegen2.dfs.core.windows.net"
+		},
 		"LS_CovidProject_BLB_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "Az-blbstrge-connstrng"
+		},
+		"LS_Covid_ECDwebsite_Project_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().sourceBaseURL}"
 		},
 		"LS_KV_CovidProject_properties_typeProperties_baseUrl": {
 			"type": "string",
@@ -18,10 +26,6 @@
 		"LS_adls_covidproject_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://azadfdatalakegen2.dfs.core.windows.net"
-		},
-		"TR_CovidProject_population_event_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/e28292ad-5166-4e02-8b60-16a2151d18a5/resourceGroups/Storage-RG/providers/Microsoft.Storage/storageAccounts/saravanastroagetest"
 		}
 	},
 	"variables": {
@@ -29,39 +33,17 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_Copydata_CovidProject')]",
+			"name": "[concat(parameters('factoryName'), '/PL_ECDC_Ingest_data-CovidProject')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Validate if file is present",
-						"type": "Validation",
+						"name": "Read Metada",
+						"type": "Lookup",
 						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "DS_Blb_CovidProject",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"timeout": "0.00:00:10",
-							"sleep": 10
-						}
-					},
-					{
-						"name": "Copy data from blb to adls",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "Validate if file is present",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
 						"policy": {
-							"timeout": "0.00:10:00",
+							"timeout": "0.00:06:00",
 							"retry": 0,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
@@ -70,51 +52,119 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "DelimitedTextSource",
+								"type": "JsonSource",
 								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
+									"type": "AzureBlobFSReadSettings",
 									"recursive": true,
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
+									"type": "JsonReadSettings"
 								}
 							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_Blb_CovidProject",
+							"dataset": {
+								"referenceName": "DS_ADLS_ECDC_Metadata_Json",
 								"type": "DatasetReference",
 								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "For each Metadata from the Lookup",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Read Metada",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
-						"outputs": [
-							{
-								"referenceName": "DS_ADLS_CovidProject",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('read Metada').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Copy from HTTP to ADLS",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.00:50:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "HttpReadSettings",
+												"requestMethod": "GET"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"copyBehavior": "FlattenHierarchy"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_HTTP_Ingest_Data_Covid",
+											"type": "DatasetReference",
+											"parameters": {
+												"sourceRelativeURL": {
+													"value": "@item().sourceRelativeURL",
+													"type": "Expression"
+												},
+												"sourceBaseURL": {
+													"value": "@item().sourceBaseURL",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ADLS_CovidProject",
+											"type": "DatasetReference",
+											"parameters": {
+												"sinkFileName": {
+													"value": "@item().sinkFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
 					}
 				],
 				"policy": {
@@ -124,7 +174,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Blb_CovidProject')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_ECDC_Metadata_Json')]",
+				"[concat(variables('factoryId'), '/datasets/DS_HTTP_Ingest_Data_Covid')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_CovidProject')]"
 			]
 		},
@@ -137,13 +188,20 @@
 					"referenceName": "LS_adls_covidproject",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"sinkFileName": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "Population_by_Age.tsv",
-						"folderPath": "Population",
+						"fileName": {
+							"value": "@dataset().sinkFileName",
+							"type": "Expression"
+						},
 						"fileSystem": "covidproject"
 					},
 					"columnDelimiter": "\t",
@@ -155,6 +213,43 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_adls_covidproject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_ECDC_Metadata_Json')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Metadata_Json_Covid",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "ecdc_file_list.json",
+						"fileSystem": "covidproject"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"sourceBaseURL": {
+							"type": "string"
+						},
+						"sourceRelativeURL": {
+							"type": "string"
+						},
+						"sinkFileName": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Metadata_Json_Covid')]"
 			]
 		},
 		{
@@ -188,6 +283,73 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_HTTP_Ingest_Data_Covid')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_Covid_ECDwebsite_Project",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"sourceBaseURL": {
+							"value": "@dataset().sourceBaseURL",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"sourceRelativeURL": {
+						"type": "string"
+					},
+					"sourceBaseURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation",
+						"relativeUrl": {
+							"value": "@dataset().sourceRelativeURL",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_Covid_ECDwebsite_Project')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Metadata_Json_Covid')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_Metadata_Json_Covid_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_KV_CovidProject",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "ADFAzureDatalakegen2storageacc"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_KV_CovidProject')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_CovidProject_BLB')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -208,6 +370,26 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_KV_CovidProject')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_Covid_ECDwebsite_Project')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"sourceBaseURL": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "HttpServer",
+				"typeProperties": {
+					"url": "[parameters('LS_Covid_ECDwebsite_Project_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_KV_CovidProject')]",
@@ -246,7 +428,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/TR_CovidProject_population_event')]",
+			"name": "[concat(parameters('factoryName'), '/TR_Schedule_Copydata_CovidProj')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -255,24 +437,25 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "PL_Copydata_CovidProject",
+							"referenceName": "PL_ECDC_Ingest_data-CovidProject",
 							"type": "PipelineReference"
 						},
 						"parameters": {}
 					}
 				],
-				"type": "BlobEventsTrigger",
+				"type": "ScheduleTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/covid-project-container/blobs/tps00010.tsv.gz",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('TR_CovidProject_population_event_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1,
+						"startTime": "2022-08-01T16:26:00",
+						"endTime": "2022-08-02T16:30:00",
+						"timeZone": "India Standard Time"
+					}
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Copydata_CovidProject')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_ECDC_Ingest_data-CovidProject')]"
 			]
 		}
 	]
