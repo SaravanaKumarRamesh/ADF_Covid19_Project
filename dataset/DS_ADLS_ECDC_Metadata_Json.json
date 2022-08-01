@@ -1,0 +1,32 @@
+{
+	"name": "DS_ADLS_ECDC_Metadata_Json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Metadata_Json_Covid",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "ecdc_file_list.json",
+				"fileSystem": "covidproject"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"sourceBaseURL": {
+					"type": "string"
+				},
+				"sourceRelativeURL": {
+					"type": "string"
+				},
+				"sinkFileName": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}
