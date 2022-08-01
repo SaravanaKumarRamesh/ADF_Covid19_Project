@@ -1,6 +1,11 @@
 {
 	"name": "LS_Covid_ECDwebsite_Project",
 	"properties": {
+		"parameters": {
+			"sourceBaseURL": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "HttpServer",
 		"typeProperties": {
