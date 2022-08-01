@@ -3,7 +3,13 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_Covid_ECDwebsite_Project",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"sourceBaseURL": {
+					"value": "@dataset().sourceBaseURL",
+					"type": "Expression"
+				}
+			}
 		},
 		"parameters": {
 			"sourceRelativeURL": {
