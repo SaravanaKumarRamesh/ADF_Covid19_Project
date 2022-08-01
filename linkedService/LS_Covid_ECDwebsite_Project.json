@@ -1,0 +1,17 @@
+{
+	"name": "LS_Covid_ECDwebsite_Project",
+	"properties": {
+		"parameters": {
+			"sourceBaseURL": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "HttpServer",
+		"typeProperties": {
+			"url": "@{linkedService().sourceBaseURL}",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
