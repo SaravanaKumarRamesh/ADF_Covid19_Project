@@ -1,5 +1,5 @@
 {
-	"name": "DS_Covid_ECDC_casesdeaths_Project",
+	"name": "DS_HTTP_casesdeaths_Project",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_Covid_ECDwebsite_Project",
