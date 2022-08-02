@@ -829,7 +829,7 @@
 						"removeURLandrenamecdateandweek, DSCountryLookup lookup(removeURLandrenamecdateandweek@country == DSCountryLookup@country,",
 						"     multiple: false,",
 						"     pickup: 'first',",
-						"     asc(DSCountryLookup@country, true),",
+						"     asc(DSCountryLookup@country, false),",
 						"     broadcast: 'auto')~> lookupcountry",
 						"lookupcountry select(mapColumn(",
 						"          country = removeURLandrenamecdateandweek@country,",
@@ -933,14 +933,7 @@
 					{
 						"name": "Hospitaladmin",
 						"type": "ExecuteDataFlow",
-						"dependsOn": [
-							{
-								"activity": "Cases and deaths Transformation",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"timeout": "0.00:50:00",
 							"retry": 0,
@@ -969,37 +962,6 @@
 							},
 							"traceLevel": "Fine"
 						}
-					},
-					{
-						"name": "Cases and deaths Transformation",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "1.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "DF_Cases and Deaths",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"CasesanddeathsSRC": {},
-									"CountryColumns": {},
-									"casesanddeathssink": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
 					}
 				],
 				"policy": {
@@ -1009,8 +971,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DF_Hospitaladmins')]",
-				"[concat(variables('factoryId'), '/dataflows/DF_Cases and Deaths')]"
+				"[concat(variables('factoryId'), '/dataflows/DF_Hospitaladmins')]"
 			]
 		},
 		{
