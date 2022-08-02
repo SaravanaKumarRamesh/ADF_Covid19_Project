@@ -1176,7 +1176,7 @@
 						"removeURLandrenamecdateandweek, DSCountryLookup lookup(removeURLandrenamecdateandweek@country == DSCountryLookup@country,",
 						"     multiple: false,",
 						"     pickup: 'first',",
-						"     asc(DS_CountryLookup@country, true),",
+						"     asc(DSCountryLookup@country, true),",
 						"     broadcast: 'auto')~> lookupcountry",
 						"lookupcountry select(mapColumn(",
 						"          country = removeURLandrenamecdateandweek@country,",
