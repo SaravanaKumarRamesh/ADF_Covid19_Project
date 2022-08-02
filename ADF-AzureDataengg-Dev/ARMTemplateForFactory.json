@@ -64,7 +64,7 @@
 								"parameters": {},
 								"datasetParameters": {
 									"Hospitaladminsource": {},
-									"CountryLookupdataset": {},
+									"DSCountryLookup": {},
 									"DateDimDS": {},
 									"Dailycasessink": {},
 									"WeeklycasesSink": {}
@@ -319,7 +319,7 @@
 								"parameters": {},
 								"datasetParameters": {
 									"Hospitaladminsource": {},
-									"CountryLookupdataset": {},
+									"DSCountryLookup": {},
 									"DateDimDS": {},
 									"Dailycasessink": {},
 									"WeeklycasesSink": {}
@@ -1058,7 +1058,7 @@
 								"referenceName": "DS_DF_Country_lookup_Covid",
 								"type": "DatasetReference"
 							},
-							"name": "CountryLookupdataset"
+							"name": "DSCountryLookup"
 						},
 						{
 							"dataset": {
@@ -1144,7 +1144,7 @@
 						"     ),",
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> CountryLookupdataset",
+						"     ignoreNoFilesFound: false) ~> DSCountryLookup",
 						"source(output(",
 						"          date_key as string,",
 						"          date as string,",
@@ -1173,10 +1173,10 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> removeURLandrenamecdateandweek",
-						"removeURLandrenamecdateandweek, CountryLookupdataset lookup(removeURLandrenamecdateandweek@country == CountryLookupdataset@country,",
+						"removeURLandrenamecdateandweek, DSCountryLookup lookup(removeURLandrenamecdateandweek@country == DSCountryLookup@country,",
 						"     multiple: false,",
 						"     pickup: 'first',",
-						"     asc(Lookupdataset@country, true),",
+						"     asc(DS_CountryLookup@country, true),",
 						"     broadcast: 'auto')~> lookupcountry",
 						"lookupcountry select(mapColumn(",
 						"          country = removeURLandrenamecdateandweek@country,",
