@@ -1,5 +1,5 @@
 {
-	"name": "DF_DS_ADLS_WeeklyCases_sink",
+	"name": "DF_DS_ADLS_Cases_sink",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_adls_covidproject",

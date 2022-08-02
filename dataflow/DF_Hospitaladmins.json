@@ -29,10 +29,17 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DF_DS_ADLS_WeeklyCases_sink",
+						"referenceName": "DF_DS_ADLS_Cases_sink",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "Dailycasessink"
+				},
+				{
+					"dataset": {
+						"referenceName": "DF_DS_ADLS_Cases_sink",
+						"type": "DatasetReference"
+					},
+					"name": "WeeklycasesSink"
 				}
 			],
 			"transformations": [
@@ -190,13 +197,25 @@
 				"     input(",
 				"          {country     country_code     continent     population     indicator     weekly_count     year_week     rate_14_day     cumulative_count     source     note} as string",
 				"     ),",
-				"     partitionFileNames:[''],",
+				"     partitionFileNames:[(concat('dailycases',toString(currentDate('India Standard Time'))))],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     partitionBy('hash', 1)) ~> sink1"
+				"     partitionBy('hash', 1)) ~> Dailycasessink",
+				"sort2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {country     country_code     continent     population     indicator     weekly_count     year_week     rate_14_day     cumulative_count     source     note} as string",
+				"     ),",
+				"     partitionFileNames:[(concat('Weeklycases',toString(currentDate('India Standard Time'))))],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> WeeklycasesSink"
 			]
 		}
 	}
