@@ -19,9 +19,9 @@
 					"name": "Lookupdataset"
 				},
 				{
-					"linkedService": {
-						"referenceName": "LS_adls_covidproject",
-						"type": "LinkedServiceReference"
+					"dataset": {
+						"referenceName": "DF_DS_Dimdate",
+						"type": "DatasetReference"
 					},
 					"name": "source1"
 				}
@@ -42,6 +42,9 @@
 				},
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -68,29 +71,23 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> Lookupdataset",
 				"source(output(",
-				"          date_key as date,",
-				"          date as date,",
-				"          year as short,",
-				"          month as short,",
-				"          day as short,",
+				"          date_key as string,",
+				"          date as string,",
+				"          year as string,",
+				"          month as string,",
+				"          day as string,",
 				"          day_name as string,",
-				"          day_of_year as short,",
-				"          week_of_month as short,",
-				"          week_of_year as short,",
+				"          day_of_year as string,",
+				"          week_of_month as string,",
+				"          week_of_year as string,",
 				"          month_name as string,",
-				"          year_month as integer,",
-				"          year_week as integer",
+				"          year_month as string,",
+				"          year_week as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     format: 'delimited',",
-				"     fileSystem: 'covidproject',",
-				"     fileName: 'dim_date.csv',",
-				"     columnDelimiter: ',',",
-				"     escapeChar: '\\\\',",
-				"     quoteChar: '\\\"',",
-				"     columnNamesAsHeader: true) ~> source1",
+				"     limit: 2000,",
+				"     ignoreNoFilesFound: false) ~> source1",
 				"Hospitaladminsource select(mapColumn(",
 				"          country,",
 				"          indicator,",
@@ -121,8 +118,10 @@
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"select1 split(indicator == 'Daily hospital occupancy' || indicator == 'Daily ICU occupancy',",
 				"     disjoint: false) ~> Splitbasedonindicator@(Daily, Weekly)",
-				"source1 derive(DerColumn = ERROR_FUNCTION(''),",
-				"          column1 = ERROR_FUNCTION('')) ~> derivedColumn1"
+				"source1 derive(Derived_yearweek = year+'-W'+lpad(week_of_year, 2, '0')) ~> derivedColumn1",
+				"derivedColumn1 aggregate(groupBy(Derived_yearweek),",
+				"     Week_startdate = min(date),",
+				"          Week_enddate = max(date)) ~> aggregate1"
 			]
 		}
 	}
