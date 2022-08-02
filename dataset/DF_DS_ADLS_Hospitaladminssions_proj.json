@@ -11,6 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "hospital_admissions.csv",
+				"folderPath": "hospital_admissions",
 				"fileSystem": "covidproject"
 			},
 			"columnDelimiter": "\t",
