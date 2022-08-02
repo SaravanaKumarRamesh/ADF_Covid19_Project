@@ -394,6 +394,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": "ecdc_file_list.json",
+						"folderPath": "Config",
 						"fileSystem": "covidproject"
 					}
 				},
