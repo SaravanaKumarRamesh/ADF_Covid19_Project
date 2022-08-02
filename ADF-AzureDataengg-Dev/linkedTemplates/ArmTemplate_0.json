@@ -178,6 +178,39 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DF_DS_ADLS_Cases_sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_adls_covidproject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "Processed",
+						"fileSystem": "covidproject"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "country\tcountry_code\tcontinent\tpopulation\tindicator\tweekly_count\tyear_week\trate_14_day\tcumulative_count\tsource\tnote",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_adls_covidproject')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DF_DS_ADLS_Hospitaladminssions_proj')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -192,6 +225,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": "hospital_admissions.csv",
+						"folderPath": "hospital_admissions",
 						"fileSystem": "covidproject"
 					},
 					"columnDelimiter": "\t",
@@ -235,7 +269,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DF_DS_ADLS_Cases_sink')]",
+			"name": "[concat(parameters('factoryName'), '/DF_DS_Casesanddeaths_ingestion')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -248,16 +282,58 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"fileName": "cases_deaths.csv",
+						"folderPath": "cases_deaths",
 						"fileSystem": "covidproject"
 					},
-					"columnDelimiter": ",",
+					"columnDelimiter": "\t",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
 				"schema": [
 					{
-						"name": "country\tcountry_code\tcontinent\tpopulation\tindicator\tweekly_count\tyear_week\trate_14_day\tcumulative_count\tsource\tnote",
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "country_code",
+						"type": "String"
+					},
+					{
+						"name": "continent",
+						"type": "String"
+					},
+					{
+						"name": "population",
+						"type": "String"
+					},
+					{
+						"name": "indicator",
+						"type": "String"
+					},
+					{
+						"name": "weekly_count",
+						"type": "String"
+					},
+					{
+						"name": "year_week",
+						"type": "String"
+					},
+					{
+						"name": "rate_14_day",
+						"type": "String"
+					},
+					{
+						"name": "cumulative_count",
+						"type": "String"
+					},
+					{
+						"name": "source",
+						"type": "String"
+					},
+					{
+						"name": "note",
 						"type": "String"
 					}
 				]
@@ -644,6 +720,125 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DF_Cases and Deaths')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DF_DS_Casesanddeaths_ingestion",
+								"type": "DatasetReference"
+							},
+							"name": "CasesanddeathsSRC"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_DF_Country_lookup_Covid",
+								"type": "DatasetReference"
+							},
+							"name": "CountryColumns"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DF_DS_ADLS_Cases_sink",
+								"type": "DatasetReference"
+							},
+							"name": "casesanddeathssink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CountrycodesLookup"
+						},
+						{
+							"name": "removecolumns"
+						},
+						{
+							"name": "pivot1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          country as string,",
+						"          country_code as string,",
+						"          continent as string,",
+						"          population as integer,",
+						"          indicator as string,",
+						"          weekly_count as integer,",
+						"          year_week as string,",
+						"          rate_14_day as string,",
+						"          cumulative_count as string,",
+						"          source as string,",
+						"          note as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     limit: 10000,",
+						"     ignoreNoFilesFound: false) ~> CasesanddeathsSRC",
+						"source(output(",
+						"          country as string,",
+						"          country_code_2_digit as string,",
+						"          country_code_3_digit as string,",
+						"          continent as string,",
+						"          population as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> CountryColumns",
+						"CasesanddeathsSRC, CountryColumns lookup(CasesanddeathsSRC@country == CountryColumns@country,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> CountrycodesLookup",
+						"CountrycodesLookup select(mapColumn(",
+						"          country = CasesanddeathsSRC@country,",
+						"          country_code_2_digit,",
+						"          country_code_3_digit,",
+						"          population = CasesanddeathsSRC@population,",
+						"          indicator,",
+						"          weekly_count,",
+						"          year_week,",
+						"          cumulative_count,",
+						"          source",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> removecolumns",
+						"removecolumns pivot(groupBy(country,",
+						"          country_code_2_digit,",
+						"          country_code_3_digit,",
+						"          population,",
+						"          year_week,",
+						"          source),",
+						"     pivotBy(indicator),",
+						"     Count = sum(weekly_count),",
+						"     columnNaming: '$V_$N',",
+						"     lateral: true) ~> pivot1",
+						"pivot1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          {country     country_code     continent     population     indicator     weekly_count     year_week     rate_14_day     cumulative_count     source     note} as string",
+						"     ),",
+						"     partitionFileNames:['Processedc_casesanddeaths.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> casesanddeathssink"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DF_DS_Casesanddeaths_ingestion')]",
+				"[concat(variables('factoryId'), '/datasets/DS_DF_Country_lookup_Covid')]",
+				"[concat(variables('factoryId'), '/datasets/DF_DS_ADLS_Cases_sink')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DF_Hospitaladmins')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -812,6 +1007,8 @@
 						"          country_code_3_digit,",
 						"          Reported_year_week,",
 						"          population,",
+						"          Week_startdate,",
+						"          Week_enddate,",
 						"          source),",
 						"     pivotBy(indicator),",
 						"     Count = sum(value),",
@@ -830,10 +1027,11 @@
 						"          Reported_year_week,",
 						"          Week_startdate,",
 						"          Week_enddate,",
-						"          population),",
+						"          population,",
+						"          source),",
 						"     pivotBy(indicator),",
 						"     Count = sum(value),",
-						"     columnNaming: '$N$V',",
+						"     columnNaming: '$V_$N',",
 						"     lateral: true) ~> DailyPivot",
 						"DailyPivot sort(asc(Reported_year_week, false),",
 						"     asc(country, false)) ~> sort1",
@@ -844,7 +1042,7 @@
 						"     input(",
 						"          {country     country_code     continent     population     indicator     weekly_count     year_week     rate_14_day     cumulative_count     source     note} as string",
 						"     ),",
-						"     partitionFileNames:[(concat('dailycases',toString(currentDate('India Standard Time'))))],",
+						"     partitionFileNames:['Dailycases_count.csv'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -856,7 +1054,7 @@
 						"     input(",
 						"          {country     country_code     continent     population     indicator     weekly_count     year_week     rate_14_day     cumulative_count     source     note} as string",
 						"     ),",
-						"     partitionFileNames:[(concat('Weeklycases',toString(currentDate('India Standard Time'))))],",
+						"     partitionFileNames:['WeeklycasesCount.csv'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -871,6 +1069,95 @@
 				"[concat(variables('factoryId'), '/datasets/DS_DF_Country_lookup_Covid')]",
 				"[concat(variables('factoryId'), '/datasets/DF_DS_Dimdate')]",
 				"[concat(variables('factoryId'), '/datasets/DF_DS_ADLS_Cases_sink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_DataTransformation')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Hospitaladmin",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Cases and deaths Transformation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:50:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DF_Hospitaladmins",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"Hospitaladminsource": {},
+									"Lookupdataset": {},
+									"source1": {},
+									"Dailycasessink": {},
+									"WeeklycasesSink": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Cases and deaths Transformation",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DF_Cases and Deaths",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CasesanddeathsSRC": {},
+									"CountryColumns": {},
+									"casesanddeathssink": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/DF_Hospitaladmins')]",
+				"[concat(variables('factoryId'), '/dataflows/DF_Cases and Deaths')]"
 			]
 		},
 		{
@@ -902,57 +1189,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_ECDC_Ingest_data-CovidProject')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_DataTransformation')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Hospitaladmin",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.00:50:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "DF_Hospitaladmins",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"Hospitaladminsource": {},
-									"Lookupdataset": {},
-									"source1": {},
-									"Dailycasessink": {},
-									"WeeklycasesSink": {}
-								},
-								"linkedServiceParameters": {}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DF_Hospitaladmins')]"
 			]
 		}
 	]
