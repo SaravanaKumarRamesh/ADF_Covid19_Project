@@ -5,14 +5,7 @@
 			{
 				"name": "Hospitaladmin",
 				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "Cases and deaths Transformation",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:50:00",
 					"retry": 0,
@@ -24,30 +17,6 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "DF_Hospitaladmins",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "Cases and deaths Transformation",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "1.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "DF_Cases and Deaths",
 						"type": "DataFlowReference"
 					},
 					"compute": {
