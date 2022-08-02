@@ -1,0 +1,27 @@
+{
+	"name": "DF_DS_ADLS_WeeklyCases_sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_adls_covidproject",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "covidproject"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "country\tcountry_code\tcontinent\tpopulation\tindicator\tweekly_count\tyear_week\trate_14_day\tcumulative_count\tsource\tnote",
+				"type": "String"
+			}
+		]
+	}
+}
