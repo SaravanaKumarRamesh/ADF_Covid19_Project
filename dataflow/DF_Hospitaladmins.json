@@ -53,7 +53,7 @@
 					"name": "RemoveDupcolumnfrmLookup"
 				},
 				{
-					"name": "Splitbasedonindicator"
+					"name": "SplitbasedonIndicator"
 				},
 				{
 					"name": "DeriveYearweek"
@@ -150,12 +150,12 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> RemoveDupcolumnfrmLookup",
 				"RemoveDupcolumnfrmLookup split(indicator == 'Daily hospital occupancy' || indicator == 'Daily ICU occupancy',",
-				"     disjoint: false) ~> Splitbasedonindicator@(Daily, Weekly)",
+				"     disjoint: false) ~> SplitbasedonIndicator@(Daily, Weekly)",
 				"DateDimDS derive(Derived_yearweek = year+'-W'+lpad(week_of_year, 2, '0')) ~> DeriveYearweek",
 				"DeriveYearweek aggregate(groupBy(Derived_yearweek),",
 				"     Week_startdate = min(date),",
 				"          Week_enddate = max(date)) ~> MinandMaxDate",
-				"Splitbasedonindicator@Weekly, MinandMaxDate join(Reported_year_week == Derived_yearweek,",
+				"SplitbasedonIndicator@Weekly, MinandMaxDate join(Reported_year_week == Derived_yearweek,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -173,7 +173,7 @@
 				"     columnNaming: '$N$V',",
 				"     lateral: true,",
 				"     partitionBy('hash', 1)) ~> WeeklyPivot",
-				"Splitbasedonindicator@Daily, MinandMaxDate join(Reported_year_week == Derived_yearweek,",
+				"SplitbasedonIndicator@Daily, MinandMaxDate join(Reported_year_week == Derived_yearweek,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
