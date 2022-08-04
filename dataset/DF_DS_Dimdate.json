@@ -11,6 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "dim_date.csv",
+				"folderPath": "Dimdate",
 				"fileSystem": "covidproject"
 			},
 			"columnDelimiter": ",",
