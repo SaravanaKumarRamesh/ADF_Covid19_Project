@@ -29,14 +29,14 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DF_DS_ADLS_Cases_sink",
+						"referenceName": "DF_DS_ADLS_Processed_hospitaladmissions_Daily",
 						"type": "DatasetReference"
 					},
 					"name": "Dailycasessink"
 				},
 				{
 					"dataset": {
-						"referenceName": "DF_DS_ADLS_Cases_sink",
+						"referenceName": "DF_DS_ADLS_Processed_hospitaladmissions_Weekly",
 						"type": "DatasetReference"
 					},
 					"name": "WeeklycasesSink"
@@ -197,9 +197,6 @@
 				"     asc(country, true)) ~> ReportedweekandcountryWeeklydata",
 				"Reportedweekandcountrysort sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          {country     country_code     continent     population     indicator     weekly_count     year_week     rate_14_day     cumulative_count     source     note} as string",
-				"     ),",
 				"     partitionFileNames:['Hospital_admissions_Daily.csv'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
@@ -209,9 +206,6 @@
 				"     partitionBy('hash', 1)) ~> Dailycasessink",
 				"ReportedweekandcountryWeeklydata sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          {country     country_code     continent     population     indicator     weekly_count     year_week     rate_14_day     cumulative_count     source     note} as string",
-				"     ),",
 				"     partitionFileNames:['Hospital_admissions_weekly.csv'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
