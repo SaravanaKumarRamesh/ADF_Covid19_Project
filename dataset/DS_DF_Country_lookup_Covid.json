@@ -11,6 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "country_lookup.csv",
+				"folderPath": "Countrylookup",
 				"fileSystem": "covidproject"
 			},
 			"columnDelimiter": ",",
