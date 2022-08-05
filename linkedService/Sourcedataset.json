@@ -1,0 +1,17 @@
+{
+	"name": "Sourcedataset",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_CovidProject",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "Azsqldb-key"
+			}
+		}
+	}
+}
