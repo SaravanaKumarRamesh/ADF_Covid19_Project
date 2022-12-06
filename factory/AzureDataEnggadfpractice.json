@@ -1,0 +1,9 @@
+{
+	"name": "AzureDataEnggadfpractice",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c834e6ca-8412-4850-891d-4bb221f284d8",
+		"tenantId": "e0793d39-0939-496d-b129-198edd916feb"
+	}
+}
